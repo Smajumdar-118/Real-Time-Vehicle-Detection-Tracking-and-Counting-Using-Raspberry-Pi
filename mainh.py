@@ -40,7 +40,9 @@ counterbusdown=[]
 upbus={}
 counterbusup=[]
 downtruck={}
+uptruck={}
 countertruckdown=[]
+countertruckup=[]
 while True:    
     ret,frame = cap.read()
     if not ret:
@@ -80,6 +82,9 @@ while True:
             
 
     bbox_idx=tracker.update(list)
+    bbox1_idx=tracker1.update(list1)
+    bbox2_idx=tracker2.update(list2)
+    
     for bbox in bbox_idx:
         x3,y3,x4,y4,id1=bbox
         cx3=int(x3+x4)//2
@@ -105,14 +110,74 @@ while True:
                 if countercardown.count(id1)==0 :
                     countercardown.append(id1)
               
-                  
-                    
+  ################### Bus##########################################################                
+    for bbox1 in bbox1_idx:
+        x5,y5,x6,y6,id2 = bbox1
+        cx4= int(x5+x6)//2
+        cy4 = int(y5+y6)//2
+        if cy1 < (cy4+offset) and cy1 > (cy4 - offset):
+            upbus[id2] = (cx4,cy4)
+        if id2 in upbus:
+            if cy2 < (cy4+offset) and cy2 > (cy4 - offset):
+                cv2.circle(frame,(cx4,cy4),4,(255,0,0),-1)
+                cv2.rectangle(frame,(x5,y5),(x6,y6),(255,0,255),2)
+                cvzone.putTextRect(frame,f'{id2}',(x5,y5),1,1)
+                if counterbusup.count(id2) == 0 :
+                    counterbusup.append(id2)
+
+        if cy2 < (cy4+offset) and cy2 > (cy4 - offset):
+            downbus[id2] = (cx4,cy4)
+        if id2 in downbus:
+            if cy1 < (cy4+offset) and cy1 > (cy4 - offset):
+                cv2.circle(frame,(cx4,cy4),4,(255,0,255),-1)
+                cv2.rectangle(frame,(x5,y5),(x6,y6),(255,0,0),2)
+                cvzone.putTextRect(frame,f'{id2}',(x5,y5),1,1)
+                if counterbusdown.count(id2) == 0 :
+                    counterbusdown.append(id2)
+
+
+###############################  TRUCK ########################################################
+
+    for bbox2 in bbox2_idx:
+        x7,y7,x8,y8,id3 = bbox2
+        cx5= int(x7+x8)//2
+        cy5 = int(y8+y8)//2
+        if cy1 < (cy5+offset) and cy1 > (cy5 - offset):
+            uptruck[id3] = (cx5,cy5)
+        if id3 in uptruck:
+            if cy2 < (cy5+offset) and cy2 > (cy5 - offset):
+                cv2.circle(frame,(cx5,cy5),4,(255,0,255),-1)
+                cv2.rectangle(frame,(x7,y7),(x8,y8),(255,0,0),2)
+                cvzone.putTextRect(frame,f'{id3}',(x7,y7),1,1)
+                if countertruckup.count(id3) == 0 :
+                    countertruckup.append(id3)
+
+        if cy2 < (cy5+offset) and cy2 > (cy5 - offset):
+            downtruck[id3] = (cx5,cy5)
+        if id3 in downtruck:
+            if cy1 < (cy5+offset) and cy1 > (cy5 - offset):
+                cv2.circle(frame,(cx5,cy5),4,(255,0,255),-1)
+                cv2.rectangle(frame,(x7,y7),(x8,y8),(255,0,0),2)
+                cvzone.putTextRect(frame,f'{id3}',(x7,y7),1,1)
+                if countertruckdown.count(id3) == 0 :
+                    countertruckdown.append(id3)
+
+
+
     cv2.line(frame,(1,cy1),(1018,cy1),(0,255,0),2)
     cv2.line(frame,(3,cy2),(1016,cy2),(0,0,255),2)
     cup=len(countercarup)
     cdown=len(countercardown)
-    cvzone.putTextRect(frame,f'UpCar:-{cup}',(50,60),2,2)
-    cvzone.putTextRect(frame,f'DownCar:-{cdown}',(50,160),2,2)
+    cbuusup = len(counterbusup)
+    cbuusdown = len(counterbusdown)
+    ctruckdown = len(countertruckdown)
+    ctruckup = len(countertruckup)
+    cvzone.putTextRect(frame,f'UpCar:-{cup}',(14,30),2,2)
+    cvzone.putTextRect(frame,f'DownCar:-{cdown}',(14,82),2,2)
+    cvzone.putTextRect(frame,f'UpTruck:-{ctruckup}',(14,132),2,2)
+    cvzone.putTextRect(frame,f'UpBus:-{cbuusup}',(833,35),2,2)
+    cvzone.putTextRect(frame,f'DownBus:-{cbuusdown}',(792,85),2,2)
+    cvzone.putTextRect(frame,f'DownTruck:-{ctruckdown}',(756,135),2,2)
    
     cv2.imshow("RGB", frame)
     if cv2.waitKey(1)&0xFF==27:
