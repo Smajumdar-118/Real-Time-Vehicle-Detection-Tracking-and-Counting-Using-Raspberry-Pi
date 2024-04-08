@@ -41,7 +41,8 @@ def RGB(event, x, y, flags, param):
 
 cv2.namedWindow('RGB')
 cv2.setMouseCallback('RGB', RGB)
-cap=cv2.VideoCapture('tf.mp4')
+# cap=cv2.VideoCapture('tf.mp4')
+cap=cv2.VideoCapture(0)
 
 
 my_file = open("coco.txt", "r")
