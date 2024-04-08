@@ -3,7 +3,33 @@ import pandas as pd
 from ultralytics import YOLO
 import cvzone
 import numpy as np
+import pyrebase
+import datetime
+import os
+from dotenv import load_dotenv
 from tracker import*
+load_dotenv()
+
+
+
+API_KEY = os.getenv('MY_API_KEY')
+API_ID = os.getenv('MY_API_ID')
+config = {
+    "apiKey": API_KEY,
+    "authDomain": "raspberrypidata-3a619.firebaseapp.com",
+    "projectId": "raspberrypidata-3a619",
+    "databaseURL" : "https://raspberrypidata-3a619-default-rtdb.firebaseio.com/",
+    "storageBucket": "raspberrypidata-3a619.appspot.com",
+    "messagingSenderId": "717931168998",
+    "appId": API_ID ,
+    "measurementId": "G-0CF8B985MH"
+}
+
+firebase = pyrebase.initialize_app(config)
+database = firebase.database()
+
+
+
 model=YOLO('yolov8s.pt')
 
 def RGB(event, x, y, flags, param):
@@ -178,6 +204,26 @@ while True:
     cvzone.putTextRect(frame,f'UpBus:-{cbuusup}',(833,35),2,2)
     cvzone.putTextRect(frame,f'DownBus:-{cbuusdown}',(792,85),2,2)
     cvzone.putTextRect(frame,f'DownTruck:-{ctruckdown}',(756,135),2,2)
+
+    ct = datetime.datetime.now()
+    ct_string = ct.strftime("%Y-%m-%d %H:%M:%S")
+
+
+    data = {
+        "UpCar": cup,
+        "DownCar": cdown,
+        "UpBus" : cbuusup,
+        "DownBus" : cbuusdown,
+        "UpTruck" : ctruckup,
+        "DownTruck" : ctruckdown,
+        "Time" : ct_string
+    }
+    database.child("Camera").child("Data").set(data)
+
+
+
+
+
    
     cv2.imshow("RGB", frame)
     if cv2.waitKey(1)&0xFF==27:
